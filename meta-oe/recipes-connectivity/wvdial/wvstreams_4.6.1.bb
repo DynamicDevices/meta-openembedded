@@ -16,7 +16,7 @@ SRC_URI = "http://${PN}.googlecode.com/files/${PN}-${PV}.tar.gz \
 SRC_URI[md5sum] = "2760dac31a43d452a19a3147bfde571c"
 SRC_URI[sha256sum] = "8403f5fbf83aa9ac0c6ce15d97fd85607488152aa84e007b7d0621b8ebc07633"
 
-inherit autotools pkgconfig
+inherit autotools-brokensep pkgconfig
 
 PARALLEL_MAKE = ""
 
