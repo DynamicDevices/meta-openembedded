@@ -4,9 +4,9 @@ SUMMARY = "WvStreams is a network programming library in C++"
 LICENSE = "LGPLv2"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=55ca817ccb7d5b5b66355690e9abc605"
 
-DEPENDS = "zlib openssl (>= 0.9.8)"
+DEPENDS = "zlib openssl (>= 0.9.8) dbus readline"
 
-SRC_URI = "http://${PN}.googlecode.com/files/${PN}-${PV}.tar.gz \
+SRC_URI = "http://${BPN}.googlecode.com/files/${BP}.tar.gz \
            file://04_signed_request.diff \
            file://05_gcc.diff \
            file://06_gcc-4.7.diff \

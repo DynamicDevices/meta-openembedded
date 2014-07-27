@@ -20,7 +20,7 @@ SRC_URI = "${SOURCEFORGE_MIRROR}/webadmin/webmin-${PV}.tar.gz \
 SRC_URI[md5sum] = "e93bc5057a5b7d7e31ecb2bb228d7044"
 SRC_URI[sha256sum] = "3d36153406d8e5d3dcaeadba34dfb5cdbc4060b75c38339174ac97b2277f284b"
 
-inherit allarch perlnative update-rc.d
+inherit perlnative update-rc.d
 
 do_configure() {
     # Remove binaries and plugins for other platforms
@@ -36,12 +36,12 @@ do_configure() {
     rm -rf stunnel squid sarg pptp-client pptp-server jabber openslp sentry cluster-* vgetty burner heartbeat
 
     # Adjust configs
-    mv init/config-debian-linux init/config-generic-linux
+    [ -f init/config-debian-linux ] && mv init/config-debian-linux init/config-generic-linux
     sed -i "s/shutdown_command=.*/shutdown_command=poweroff/" init/config-generic-linux
     echo "exclude=bootmisc.sh,single,halt,reboot,hostname.sh,modutils.sh,mountall.sh,mountnfs.sh,networking,populate-volatile.sh,rmnologin.sh,save-rtc.sh,umountfs,umountnfs.sh,hwclock.sh,checkroot.sh,banner.sh,udev,udev-cache,devpts.sh,psplash.sh,sendsigs,fbsetup,bootlogd,stop-bootlogd,sysfs.sh,syslog,syslog.busybox,urandom,webmin,functions.initscripts,read-only-rootfs-hook.sh" >> init/config-generic-linux
     echo "excludefs=devpts,devtmpfs,usbdevfs,proc,tmpfs,sysfs,debugfs" >> mount/config-generic-linux
 
-    mv exports/config-debian-linux exports/config-generic-linux
+    [ -f exports/config-debian-linux ] && mv exports/config-debian-linux exports/config-generic-linux
     sed -i "s/killall -HUP rpc.nfsd && //" exports/config-generic-linux
     sed -i "s/netstd_nfs/nfsserver/g" exports/config-generic-linux
 
