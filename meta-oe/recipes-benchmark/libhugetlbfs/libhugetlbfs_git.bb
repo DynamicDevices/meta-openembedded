@@ -17,7 +17,7 @@ SRC_URI = "git://git.code.sf.net/p/libhugetlbfs/code \
     file://0001-aarch64-fix-cross-compilation.patch \
     file://0001-aarch64-fix-page-size-not-properly-computed.patch \
     file://0001-replace-lib-lib64-hardcoded-values-by-LIBDIR32-LIBDI.patch \
-    file://arm32-support.patch \
+    file://0001-Extend-arm32-support-to-include-BE-variants.patch \
 "
 
 S = "${WORKDIR}/git"
@@ -28,8 +28,7 @@ LIBARGS = "LIB32=${baselib} LIB64=${baselib}"
 LIBHUGETLBFS_ARCH = "${TARGET_ARCH}"
 LIBHUGETLBFS_ARCH_powerpc = "ppc"
 LIBHUGETLBFS_ARCH_powerpc64 = "ppc64"
-EXTRA_OEMAKE = "'ARCH=${LIBHUGETLBFS_ARCH}' 'OPT=${CFLAGS}' 'CC=${CC}' ${LIBARGS} V=2"
-EXTRA_OEMAKE_append_powerpc64 = " BUILDTYPE=NATIVEONLY"
+EXTRA_OEMAKE = "'ARCH=${LIBHUGETLBFS_ARCH}' 'OPT=${CFLAGS}' 'CC=${CC}' ${LIBARGS} BUILDTYPE=NATIVEONLY V=2"
 PARALLEL_MAKE = ""
 CFLAGS += "-fexpensive-optimizations -frename-registers -fomit-frame-pointer -g0"
 

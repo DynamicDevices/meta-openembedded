@@ -3,7 +3,7 @@ HOMEPAGE = "http://www.snort.org/"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://COPYING;md5=78fa8ef966b48fbf9095e13cc92377c5"
 
-DEPENDS = "libpcap libpcre daq libdnet"
+DEPENDS = "libpcap libpcre daq libdnet util-linux"
 
 
 SRC_URI = " ${GENTOO_MIRROR}/${BP}.tar.gz;name=tarball \
@@ -11,6 +11,7 @@ SRC_URI = " ${GENTOO_MIRROR}/${BP}.tar.gz;name=tarball \
             file://disable-inaddr-none.patch \
             file://disable-dap-address-space-id.patch \
             file://0001-libpcap-search-sysroot-for-headers.patch \
+            file://not-hardcoded-libdir.patch \
 "
 
 SRC_URI[tarball.md5sum] = "18111f6de3989ca89add36077a7c2659"
