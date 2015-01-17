@@ -7,6 +7,7 @@ LIC_FILES_CHKSUM = "file://README;beginline=3;endline=8;md5=7f7f00ba639ac8e8deb5
 DEPENDS = "openssl libnl pciutils"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/net-snmp/net-snmp-${PV}.zip \
+        file://0001-Added-checks-for-printing-variables-with-wrong-types.patch \
         file://init \
         file://snmpd.conf \
         file://snmptrapd.conf \
@@ -34,6 +35,11 @@ EXTRA_OECONF = "--disable-embedded-perl \
                 --disable-manuals \
                 --with-defaults \
                 ${@base_conditional('SITEINFO_ENDIANNESS', 'le', '--with-endianness=little', '--with-endianness=big', d)}"
+
+CACHED_CONFIGUREVARS = " \
+    ac_cv_header_valgrind_valgrind_h=no \
+    ac_cv_header_valgrind_memcheck_h=no \
+"
 
 do_configure_prepend() {
     export PERLPROG="${bindir}/env perl"

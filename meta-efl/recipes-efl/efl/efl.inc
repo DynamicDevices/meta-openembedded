@@ -1,9 +1,9 @@
 SUMMARY = "EFL"
-LICENSE = "MIT BSD LGPL-2.1"
+LICENSE = "MIT & BSD & LGPL-2.1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=a1809a807e39dd48ddcf7be98477d130"
 
 DEPENDS_class-native = "freetype-native libxext-native libpng-native jpeg-native tiff-native libfribidi-native glib-2.0-native dbus-native"
-DEPENDS = "virtual/libiconv tslib curl glib-2.0 gnutls pkgconfig zlib jpeg openssl libsndfile1 dbus libexif librsvg freetype libpng tiff libxext virtual/libx11 libxrender fontconfig libfribidi giflib udev libxcursor libxcomposite libxinerama libxrandr libxtst libxscrnsaver efl-native"
+DEPENDS = "virtual/libiconv tslib curl glib-2.0 gnutls pkgconfig zlib jpeg openssl libsndfile1 dbus libexif librsvg freetype libpng tiff libxext virtual/libx11 libxdamage libxrender fontconfig libfribidi giflib udev libxcursor libxcomposite libxinerama libxrandr libxtst libxscrnsaver efl-native"
 
 inherit efl gettext pkgconfig
 
@@ -25,10 +25,14 @@ EXTRA_OECONF_append_class-target = " \
     --with-edje-cc=${STAGING_BINDIR_NATIVE}/edje_cc \
     --with-eolian-gen=${STAGING_BINDIR_NATIVE}/eolian_gen \
     --with-eolian-cxx=${STAGING_BINDIR_NATIVE}/eolian_cxx \
+    --with-elua=${STAGING_BINDIR_NATIVE}/elua \
 "
 EXTRA_OECONF_append_class-native = " \
     --disable-fontconfig \
     --disable-audio \
+    --disable-physics \
+    --disable-multisense \
+    --disable-cserve \
     --with-x11=none \
     --disable-image-loader-bmp \
     --disable-image-loader-eet \
@@ -42,6 +46,8 @@ EXTRA_OECONF_append_class-native = " \
     --disable-image-loader-wbmp \
     --disable-image-loader-webp \
     --disable-image-loader-xpm \
+    --disable-image-loader-tgv \
+    --disable-image-loader-dds \
 "
 
 PACKAGECONFIG ?= "opengl-es gstreamer1 pulseaudio luajit"

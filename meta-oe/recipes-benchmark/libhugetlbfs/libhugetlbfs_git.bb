@@ -3,7 +3,8 @@ LICENSE = "LGPLv2.1"
 LIC_FILES_CHKSUM = "file://LGPL-2.1;md5=2d5025d4aa3495befef8f17206a5b0a1"
 
 DEPENDS = "sysfsutils perl"
-RDEPENDS_${PN} += "python python-io python-lang python-subprocess python-resource"
+RDEPENDS_${PN} += "bash perl python python-io python-lang python-subprocess python-resource"
+RDEPENDS_${PN}-tests += "bash"
 
 PV = "2.18"
 PE = "1"
@@ -15,9 +16,10 @@ SRC_URI = "git://git.code.sf.net/p/libhugetlbfs/code \
     file://tests-Makefile-install-static-4G-edge-testcases.patch \
     file://0001-run_test.py-not-use-hard-coded-path-.-obj-hugeadm.patch \
     file://0001-aarch64-fix-cross-compilation.patch \
-    file://0001-aarch64-fix-page-size-not-properly-computed.patch \
+    file://0001-ld.hugetlbfs-arm-arches-fix-page-size-and-text-offse.patch \
     file://0001-replace-lib-lib64-hardcoded-values-by-LIBDIR32-LIBDI.patch \
     file://0001-Extend-arm32-support-to-include-BE-variants.patch \
+    file://0001-Makefile-Recognize-all-ix86-arches.patch \
 "
 
 S = "${WORKDIR}/git"

@@ -28,15 +28,37 @@ SRC_URI = "http://ftp.postgresql.org/pub/source/v${PV}/${BP}.tar.bz2 \
            file://postgresql.init \
            file://postgresql-bashprofile \
            file://postgresql.pam \
+           file://postgresql-setup \
+           file://postgresql.service \
            file://0001-Use-pkg-config-for-libxml2-detection.patch \
-"
+           file://0002-Predict-integer-overflow-to-avoid-buffer-overruns.patch \
+           file://0003-Shore-up-ADMIN-OPTION-restrictions.patch \
+           file://0004-Prevent-privilege-escalation-in-explicit-calls-to-PL.patch \
+           file://0005-Avoid-repeated-name-lookups-during-table-and-index-D.patch \
+           file://0006-Fix-handling-of-wide-datetime-input-output.patch \
+           file://0007-Make-pqsignal-available-to-pg_regress-of-ECPG-and-is.patch \
+           file://0008-Prevent-potential-overruns-of-fixed-size-buffers.patch \
+          "
 
 LEAD_SONAME = "libpq.so"
 
 # LDFLAGS for shared libraries
 export LDFLAGS_SL = "${LDFLAGS}"
 
-inherit autotools pkgconfig perlnative pythonnative useradd update-rc.d
+inherit autotools pkgconfig perlnative pythonnative useradd update-rc.d systemd
+
+SYSTEMD_SERVICE_${PN} = "postgresql.service"
+SYSTEMD_AUTO_ENABLE_${PN} = "disable"
+
+DEPENDS_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd-systemctl-native', '', d)}"
+pkg_postinst_${PN} () {
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd sysvinit', 'true', 'false', d)}; then
+        if [ -n "$D" ]; then
+            OPTS="--root=$D"
+        fi
+        systemctl $OPTS mask postgresql-server.service
+    fi
+}
 
 enable_pam = "${@base_contains('DISTRO_FEATURES', 'pam', 'pam', '', d)}"
 PACKAGECONFIG ??= "${enable_pam} openssl python uuid libxml tcl nls libxml perl"
@@ -171,6 +193,7 @@ do_install_append() {
     install -d ${D}${sysconfdir}/init.d
     install -m 0755 ${WORKDIR}/${BPN}.init ${D}${sysconfdir}/init.d/${BPN}-server
     sed -i -e "s/^PGVERSION=.*$/PGVERSION=${PV}/g" ${D}${sysconfdir}/init.d/${BPN}-server
+    install -m 0755 ${WORKDIR}/${BPN}-setup ${D}${bindir}/${BPN}-setup
     install -d -m 700 ${D}${localstatedir}/lib/${BPN}/data
     install -d -m 700 ${D}${localstatedir}/lib/${BPN}/backups
     install -m 644 ${WORKDIR}/${BPN}-bashprofile ${D}${localstatedir}/lib/${BPN}/.bash_profile
@@ -182,6 +205,12 @@ do_install_append() {
         install -d ${D}${sysconfdir}/pam.d
         install -m 644 ${WORKDIR}/postgresql.pam ${D}${sysconfdir}/pam.d/postgresql
     fi
+
+    # Install systemd unit files
+    install -d ${D}${systemd_unitdir}/system
+    install -m 0644 ${WORKDIR}/postgresql.service ${D}${systemd_unitdir}/system
+    sed -i -e 's,@BINDIR@,${bindir},g' \
+        ${D}${systemd_unitdir}/system/postgresql.service
 }
 
 SSTATE_SCAN_FILES += "Makefile.global"

@@ -8,11 +8,18 @@ SRC_URI = "http://samba.org/samba/ftp/stable/samba-${PV}.tar.gz \
            file://init.samba \
            file://init.winbind \
            file://tdb.pc \
+           file://nmb.service \
+           file://smb.service \
+           file://winbind.service \
 "
 
 S = "${WORKDIR}/samba-${PV}/source"
 
-inherit autotools-brokensep update-rc.d
+inherit autotools-brokensep update-rc.d systemd
+
+SYSTEMD_PACKAGES = "${PN} winbind"
+SYSTEMD_SERVICE_${PN} = "nmb.service smb.service"
+SYSTEMD_SERVICE_winbind = "winbind.service"
 
 SAMBAMMAP = "no"
 SAMBAMMAP_libc-glibc = "yes"
@@ -28,7 +35,7 @@ EXTRA_OECONF='--disable-cups \
               --with-privatedir=${sysconfdir}/samba/private \
               --with-lockdir=${localstatedir}/lock \
               --with-piddir=${localstatedir}/run \
-              --with-logfilebase=${localstatedir}/log \
+              --with-logfilebase=${localstatedir}/log/samba \
               --libdir=${libdir} \
               --with-mandir=${mandir} \
               --with-swatdir=${datadir}/swat \
@@ -44,6 +51,8 @@ PACKAGECONFIG = "${@base_contains('DISTRO_FEATURES', 'pam', 'pam', '', d)}"
 PACKAGECONFIG[pam] = "--with-pam,--without-pam,libpam"
 PACKAGECONFIG[fam] = "--enable-fam,--disable-fam,gamin"
 PACKAGECONFIG[talloc] = "--enable-external-libtalloc --with-libtalloc, --disable-external-libtalloc --without-libtalloc, talloc"
+PACKAGECONFIG[valgrind] = "ac_cv_header_valgrind_valgrind_h=yes ac_cv_header_valgrind_memcheck_h=yes, \
+                           ac_cv_header_valgrind_valgrind_h=no ac_cv_header_valgrind_memcheck_h=no, valgrind"
 
 INITSCRIPT_PACKAGES = "samba winbind"
 INITSCRIPT_NAME_samba = "samba"
@@ -103,6 +112,35 @@ do_install_append() {
 
     # usershare mount place
     mkdir -p ${D}${localstatedir}/lib/samba/usershares
+
+    # Remove sysinit script if sysvinit is not in DISTRO_FEATURES
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', 'false', 'true', d)}; then
+        rm -rf ${D}${sysconfdir}/init.d/
+    fi
+
+    install -d ${D}${systemd_unitdir}/system
+    for i in nmb smb winbind; do
+        install -m 0644 ${WORKDIR}/$i.service ${D}${systemd_unitdir}/system
+    done
+    sed -e 's,@BASE_BINDIR@,${base_bindir},g' \
+        -e 's,@SBINDIR@,${sbindir},g' \
+        -i ${D}${systemd_unitdir}/system/*.service
+
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
+	install -d ${D}${sysconfdir}/tmpfiles.d
+	echo "d ${localstatedir}/log/samba 0755 root root -" \
+            > ${D}${sysconfdir}/tmpfiles.d/99-${BPN}.conf
+    fi
+}
+
+DEPENDS_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd-systemctl-native', '', d)}"
+pkg_postinst_${PN} () {
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd sysvinit', 'true', 'false', d)}; then
+        if [ -n "$D" ]; then
+            OPTS="--root=$D"
+        fi
+        systemctl $OPTS mask samba.service
+    fi
 }
 
 pkg_postinst_libnss-winbind () {

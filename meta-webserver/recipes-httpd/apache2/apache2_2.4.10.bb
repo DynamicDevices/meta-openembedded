@@ -17,9 +17,12 @@ SRC_URI = "http://www.apache.org/dist/httpd/httpd-${PV}.tar.bz2 \
            file://httpd-2.4.3-fix-race-issue-of-dir-install.patch \
            file://npn-patch-2.4.7.patch \
            file://0001-configure-use-pkg-config-for-PCRE-detection.patch \
+           file://configure-allow-to-disable-selinux-support.patch \
            file://init \
            file://apache2-volatile.conf \
-           file://apache2.service"
+           file://apache2.service \
+           file://apache-CVE-2014-0117.patch \
+          "
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=dbff5a2b542fa58854455bf1a0b94b83"
 SRC_URI[md5sum] = "44543dff14a4ebc1e9e2d86780507156"
@@ -55,6 +58,9 @@ EXTRA_OECONF = "--enable-ssl \
     ap_cv_void_ptr_lt_long=no \
     --enable-mpms-shared \
     ac_cv_have_threadsafe_pollset=no"
+
+PACKAGECONFIG ?= "${@base_contains('DISTRO_FEATURES', 'selinux', 'selinux', '', d)}"
+PACKAGECONFIG[selinux] = "--enable-selinux,--disable-selinux,libselinux,libselinux"
 
 do_install_append() {
     install -d ${D}/${sysconfdir}/init.d
@@ -112,7 +118,7 @@ INITSCRIPT_NAME = "apache2"
 INITSCRIPT_PARAMS = "defaults 91 20"
 LEAD_SONAME = "libapr-1.so.0"
 
-PACKAGES = "${PN}-doc ${PN}-dev ${PN}-dbg ${PN}"
+PACKAGES = "${PN}-scripts ${PN}-doc ${PN}-dev ${PN}-dbg ${PN}"
 
 CONFFILES_${PN} = "${sysconfdir}/${BPN}/httpd.conf \
                    ${sysconfdir}/${BPN}/magic \
@@ -129,10 +135,15 @@ FILES_${PN}-dev = "${datadir}/${BPN}/build \
                    ${libdir}/apr*.exp \
                    ${includedir}/${BPN} \
                    ${libdir}/*.la \
-                   ${libdir}/*.a"
+                   ${libdir}/*.a \
+                   ${bindir}/apxs \
+                "
+
 
 # manual to manual
 FILES_${PN}-doc += " ${datadir}/${BPN}/manual"
+
+FILES_${PN}-scripts += "${bindir}/dbmmanage"
 
 #
 # override this too - here is the default, less datadir
@@ -150,3 +161,4 @@ FILES_${PN} += "${libdir}/lib*.so ${libdir}/pkgconfig/*"
 FILES_${PN}-dbg += "${libdir}/${BPN}/modules/.debug"
 
 RDEPENDS_${PN} += "openssl libgcc"
+RDEPENDS_${PN}-scripts += "perl ${PN}"
