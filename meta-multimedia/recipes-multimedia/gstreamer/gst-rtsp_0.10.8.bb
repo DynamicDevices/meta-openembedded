@@ -13,4 +13,19 @@ DEPENDS = "gst-plugins-base gstreamer"
 # would be to disable the checks entirely.
 inherit autotools pythonnative gettext
 
+do_install_append() {
+    if [ ! -d ${D}${libdir}/rtsp-server-examples ]; then
+        mkdir -p ${D}${libdir}/rtsp-server-examples
+        find ${S}/examples -perm /a+x -exec cp {} ${D}${libdir}/rtsp-server-examples \;
+    fi
+}
+
+PACKAGES =. " \
+    ${PN}-examples \
+    ${PN}-examples-dbg \
+"
+
+FILES_${PN}-examples += "${libdir}/rtsp-server-examples/*"
+FILES_${PN}-examples-dbg += "${libdir}/rtsp-server-examples/.debug/"
+
 FILES_${PN}-dev += "${datadir}/vala/vapi/"
